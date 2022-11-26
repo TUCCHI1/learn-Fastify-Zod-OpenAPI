@@ -1,0 +1,160 @@
+openapi: 3.0.3
+info:
+  title: Sample API using Fastify and Zod.
+  description: ZodのバリデーションスキーマからリッチなOpenAPI仕様を出力するサンプル
+  version: 1.0.0
+components:
+  schemas:
+    productSchemas:
+      type: object
+      properties:
+        createProductBodySchema:
+          type: object
+          properties:
+            title:
+              type: string
+              minLength: 3
+              maxLength: 50
+              description: 製品登録名
+            price:
+              type: number
+              maximum: 900000
+              default: 100
+              description: 価格
+            content:
+              type:
+                - "null"
+                - string
+              description: 内容
+            type:
+              type: string
+              enum:
+                - book
+                - movie
+                - game
+              description: 製品種別
+            salesStartsAt:
+              type: string
+              format: date-time
+              description: 販売開始日
+            salesEndsAt:
+              type: string
+              format: date-time
+              description: 販売終了日
+          required:
+            - title
+            - type
+            - salesStartsAt
+            - salesEndsAt
+          additionalProperties: false
+          example:
+            title: 製品A
+            price: 10000
+            content: なんか凄い製品
+            type: game
+            salesStartsAt: 2022-01-01T00:00:00.000Z
+            salesEndsAt: 2022-12-31T00:00:00.000Z
+        productResponseSchema:
+          type: object
+          properties:
+            title:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/title"
+            price:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/price"
+            content:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/content"
+            type:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/type"
+            salesStartsAt:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/salesStartsAt"
+            salesEndsAt:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/salesEndsAt"
+            id:
+              type: string
+              format: uuid
+              description: 製品ID
+            createdAt:
+              type: string
+              format: date-time
+              description: 作成日
+            updatedAt:
+              type: string
+              format: date-time
+              description: 更新日
+          required:
+            - title
+            - type
+            - salesStartsAt
+            - salesEndsAt
+            - id
+            - createdAt
+            - updatedAt
+          additionalProperties: false
+          description: Product response schema
+          example:
+            title: 製品A
+            price: 10000
+            content: なんか凄い製品
+            type: game
+            salesStartsAt: 2022-01-01T00:00:00.000Z
+            salesEndsAt: 2022-12-31T00:00:00.000Z
+            id: c165ad23-2ac3-4d80-80d7-d7b6c3e526bd
+            createdAt: 2022-06-01T00:00:00.000Z
+            updatedAt: 2022-06-01T00:00:00.000Z
+        getProductParamsSchema:
+          type: object
+          properties:
+            id:
+              $ref: "#/components/schemas/productSchemas/properties/productResponseSchema/pro\
+                perties/id"
+          required:
+            - id
+          additionalProperties: false
+          example:
+            id: c165ad23-2ac3-4d80-80d7-d7b6c3e526bd
+        getProductQuerySchema:
+          type: object
+          properties:
+            title:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                roperties/title"
+            type:
+              type: array
+              items:
+                $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema/p\
+                  roperties/type"
+          additionalProperties: false
+          example:
+            title: 製品A
+            type:
+              - game
+      required:
+        - createProductBodySchema
+        - productResponseSchema
+        - getProductParamsSchema
+        - getProductQuerySchema
+      additionalProperties: false
+paths:
+  /products/:
+    post:
+      tags:
+        - Product
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/productSchemas/properties/createProductBodySchema"
+      responses:
+        "201":
+          description: 登録完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/productSchemas/properties/productResponseSchema"
+                description: 登録完了
